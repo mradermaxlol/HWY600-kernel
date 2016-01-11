@@ -1,8 +1,24 @@
-export PATH=~/Your_Toolchain_PATH/
+### Configuring compiler
+##### You HAVE to follow this part's instructions!
+export PATH=~/TOOLCHAIN_PATH/bin/arm-gnueabi
+
+or
+
+export PATH=~/TOOLCHAIN_PATH/bin/arm-eabi
+
+and so on
 
 
-for example /alps/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.7/bin
+For example: export CROSS_COMPILE=~/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.7/bin/arm-eabi-
 
-Build Command:
+Another example:
+export CROSS_COMPILE=~/Linaro/bin/arm-eabi-
+
+### Building kernel
+Build command is:
 
 ./mk -o=TARGET_BUILD_VARIANT=user y600 n k
+
+It will produce a binary image, located at %WORKDIR%/out/Download/flash/kernel_y600.bin
+
+You will then have to connect both ramdisk from [this repo](https://github.com/mradermaxlol/HWY600-ramdisk)
