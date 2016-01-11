@@ -1690,5 +1690,3 @@ service MtkCodecService /system/bin/MtkCodecService
     user root
     group audio media sdcard_r
 
-service sysinit /system/bin/sysinit
-	oneshot
