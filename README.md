@@ -1,20 +1,6 @@
-### Configuring compiler
-##### You HAVE to follow this part's instructions!
-export PATH=~/TOOLCHAIN_PATH/bin/arm-gnueabi
-
-or
-
-export PATH=~/TOOLCHAIN_PATH/bin/arm-eabi
-
-and so on
-
-
-For example: export CROSS_COMPILE=~/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.7/bin/arm-eabi-
-
-Another example:
-export CROSS_COMPILE=~/Linaro/bin/arm-eabi-
-
 ### Building kernel
+You first have to configure your buildenv - check [this](https://github.com/mradermaxlol/HWY600-kernel/wiki/Getting-the-sources-&-configuring-buildenv) out.
+
 Build command is:
 
 ./mk -o=TARGET_BUILD_VARIANT=user y600 n k
