@@ -13,7 +13,7 @@
 ### a working boot.img with mkbootimg
 ###
 echo 'Creating a compressed cpio archive...'
-find . | cpio -o -h newc | gzip > ramdisk.cpio.gz
+find . | cpio -o -H newc | gzip > ramdisk.cpio.gz
 echo ''
 echo 'Creating boot.img...'
 mkbootimg --kernel ~/kernel.bin --ramdisk ramdisk.cpio.gz -o ~/boot.img
