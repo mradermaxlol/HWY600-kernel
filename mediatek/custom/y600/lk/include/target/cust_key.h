@@ -9,6 +9,6 @@
 
 #define MT65XX_BOOT_MENU_KEY       0     /* KEY_VOLUMEUP */
 #define MT65XX_MENU_SELECT_KEY     MT65XX_BOOT_MENU_KEY   
-#define MT65XX_MENU_OK_KEY         9     /* KEY_VOLUMEDOWN */
+#define MT65XX_MENU_OK_KEY         1     /* KEY_VOLUMEDOWN */
 
 #endif /* __CUST_KEY_H__ */
