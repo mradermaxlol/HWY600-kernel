@@ -1,14 +1,15 @@
 #ifdef BUILD_LK
+//	#include <platform/disp_drv_platform.h>
 #else
 #include <linux/string.h>
 #if defined(BUILD_UBOOT)
-#include <asm/arch/mt_gpio.h>
+	#include <asm/arch/mt_gpio.h>
+	#include <asm/delay.h>
 #else
-#include <mach/mt_gpio.h>
+	#include <mach/mt_gpio.h>
 #endif
 #endif
 #include "lcm_drv.h"
-
 #ifdef BUILD_LK
 #define LCM_PRINT printf
 #else
@@ -268,16 +269,7 @@ static void lcm_get_params(LCM_PARAMS *params){
 		params->dsi.pll_div2 = 1;		// div2=0,1,2,3;div1_real=1,2,4,4	
 		params->dsi.fbk_div = 15;    // fref=26MHz, fvco=fref*(fbk_div+1)*2/(div1_real*div2_real)	
 		params->dsi.fbk_sel = 1;
-	/*	params->dsi.HS_TRAIL=4;
-		params->dsi.HS_PRPR=3;
-		params->dsi.HS_ZERO=10;
-		params->dsi.LPX=3;
-		params->dsi.TA_GET=15;
-		params->dsi.TA_SURE=4;
-		params->dsi.TA_GO=12;
-		params->dsi.CLK_TRAIL=4;
-		params->dsi.CLK_ZERO=19;
-		params->dsi.CLK_HS_PRPR=3;*/
+
 		params->dsi.noncont_clock = TRUE; 
 		params->dsi.noncont_clock_period = 1;
 }
@@ -300,11 +292,40 @@ static void lcm_suspend(void){
 	push_table(lcm_deep_sleep_mode_in_setting, sizeof(lcm_deep_sleep_mode_in_setting) / sizeof(struct LCM_setting_table), 1);
 }
 
+#if defined(BUILD_UBOOT) || defined(BUILD_LK)
+#include "cust_adc.h"
+#define LCM_MAX_VOLTAGE 600 
+#define LCM_MIN_VOLTAGE  300 
+
+extern int IMM_GetOneChannelValue(int dwChannel, int data[4], int* rawdata);
+
+static unsigned int lcm_adc_read_chip_id()
+{
+	int data[4] = {0, 0, 0, 0};
+	int tmp = 0, rc = 0, iVoltage = -1;
+	rc = IMM_GetOneChannelValue(AUXADC_LCD_ID_CHANNEL, data, &tmp);
+	if(rc < 0) {
+		printf("read LCD_ID vol error--Liu\n");
+		return 0;
+	}
+	else {
+		iVoltage = (data[0]*1000) + (data[1]*10) + (data[2]);
+		printf("read LCD_ID success, data[0]=%d, data[1]=%d, data[2]=%d, data[3]=%d, iVoltage=%d\n", 
+			data[0], data[1], data[2], data[3], iVoltage);
+		if(LCM_MIN_VOLTAGE < iVoltage && iVoltage < LCM_MAX_VOLTAGE)
+			return 1;
+		else
+			return 0;
+	}
+	return 0;
+}
+#endif
 static unsigned int lcm_compare_id(void){
 	int id=0;
 	char buffer[5];
 	int array[4];
-
+	unsigned int result;
+	unsigned int v;
 	SET_RESET_PIN(1);
 	MDELAY(10);
 	SET_RESET_PIN(0);
@@ -318,20 +339,29 @@ static unsigned int lcm_compare_id(void){
 	read_reg_V2(0xA1, buffer, 5);
 	id = buffer[2]<<8 | buffer[3];
 
-	printk("[darren] OTM8018B kernel %s \n", __func__);
-	printk("[darren] %s id = 0x%08x \n", __func__, id);
-	return (id == 0x8009)?1:0;
+	LCM_PRINT("[darren] OTM8018B kernel %s \n", __func__);
+	LCM_PRINT("[darren] %s id = 0x%08x \n", __func__, id);
+	#if defined(BUILD_UBOOT) || defined(BUILD_LK)
+//	v = IMM_GetOneChannelValueEX(1, 1);
+	v=lcm_adc_read_chip_id();
+	#endif
+	if ( id == 0x8009 )
+//		#if defined(BUILD_UBOOT) || defined(BUILD_LK)
+//    		result = v-401 <= 598;
+//    	#else
+    		result = 1;
+//    	#endif
+  	else
+    	result = 0;
+	return result;
 }
 
 static unsigned int lcm_esd_check(void){
 	static int err_count = 0;
 	int i;
 	int result;
-	unsigned char buffer[12];
-	unsigned int array[16];
-
-	for (i = 0; i < 12; i++)
-		buffer[i] = 0x00;
+	unsigned char buffer[6];
+	unsigned int array[5];
 
 	array[0] = 0x00063700;
 	dsi_set_cmdq(array, 1, 1);
@@ -342,7 +372,7 @@ static unsigned int lcm_esd_check(void){
 		err_count ++;
 		if (err_count > 1)
 		{
-			printk("lcm_esd_true recover register [0x0A] value = 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x\n",buffer[0],buffer[1],buffer[2],buffer[3],buffer[4],buffer[5]);
+			LCM_PRINT("lcm_esd_true recover register [0x0A] value = 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x\n",buffer[0],buffer[1],buffer[2],buffer[3],buffer[4],buffer[5]);
 			result = 1;
 			err_count = 0;
 		}
