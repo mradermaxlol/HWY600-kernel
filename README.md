@@ -1,3 +1,5 @@
+#IMPORTANT: this kernel is for KitKat ROMs!
+
 ### Building kernel
 You first have to configure your buildenv - check [this](https://github.com/mradermaxlol/HWY600-kernel/wiki/Getting-the-sources-&-configuring-buildenv) out.
 
