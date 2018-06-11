@@ -1,3 +1,0 @@
-LOCAL_PREBUILT_OBJ_FILES += wifi/wifi_mt5921.o
-LOCAL_SHARED_LIBRARIES += libnetutils
-

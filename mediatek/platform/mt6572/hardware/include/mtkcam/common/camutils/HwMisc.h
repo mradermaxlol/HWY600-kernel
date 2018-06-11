@@ -1,1 +1,0 @@
-../../../../mtkcam/inc/common/camutils/HwMisc.h
